@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صيدلية د. وائل حافظ - فرع ولاء | نظام تقارير الرعاية الذكي</title>
+    
+    <!-- خط Cairo للعربية -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- مكتبة Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- مكتبة FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- مكتبة QRious لتوليد QR Code عالي الدقة -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Cairo', 'sans-serif'],
+                    },
+                    colors: {
+                        pharmacy: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                            950: '#042f2e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f1f5f9;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2e8f0;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #64748b;
+            border-radius: 4px;
+        }
+
+        /* =====================================================================
+           إعدادات الطباعة الحرارية 80mm المظبوطة (توسيط + هوامش 5mm يمين ويسار)
+           ===================================================================== */
+        @media print {
+            @page {
+                size: 80mm auto;
+                margin: 0mm !important;
+            }
+
+            * {
+                box-sizing: border-box !important;
+            }
+
+            html, body {
+                width: 80mm !important;
+                min-width: 80mm !important;
+                max-width: 80mm !important;
+                margin: 0 auto !important;
+                padding: 0 !important;
+                background: #ffffff !important;
+                color: #000000 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            main, main > div, #print-wrapper-column, #receipt-preview-stage {
+                display: block !important;
+                width: 80mm !important;
+                min-width: 80mm !important;
+                max-width: 80mm !important;
+                margin: 0 auto !important;
+                padding: 0 !important;
+                background: #ffffff !important;
+                border: none !important;
+                box-shadow: none !important;
+                position: static !important;
+            }
+
+            /* توسيط الإيصال وترك نصف سم (5mm) من اليمين واليسار بالضبط */
+            #thermal-receipt-container {
+                display: block !important;
+                width: 80mm !important;
+                min-width: 80mm !important;
+                max-width: 80mm !important;
+                margin: 0 auto !important;
+                padding-top: 3mm !important;
+                padding-bottom: 4mm !important;
+                padding-right: 5mm !important;
+                padding-left: 5mm !important;
+                box-shadow: none !important;
+                border: none !important;
+                border-radius: 0 !important;
+                background: #ffffff !important;
+                color: #000000 !important;
+                font-size: 11.5px !important;
+                line-height: 1.4 !important;
+            }
+
+            #receipt-logo-img {
+                max-height: 52px !important;
+                width: auto !important;
+                margin: 0 auto 4px auto !important;
+                display: block !important;
+                filter: contrast(1.25) !important;
+            }
+
+            #whatsapp-qr-img {
+                width: 115px !important;
+                height: 115px !important;
+                display: block !important;
+                margin: 0 auto !important;
+            }
+        }
+
+        /* معاينة الإيصال على الشاشة بمقاس 80mm وهواش 5mm مطابقة للطباعة */
+        .thermal-paper {
+            width: 80mm;
+            min-width: 80mm;
+            max-width: 80mm;
+            margin: 0 auto;
+            background: #ffffff;
+            color: #000000;
+            padding: 4mm 5mm;
+            box-shadow: 0 15px 35px rgba(15, 23, 42, 0.14);
+            border-top: 6px solid #0d9488;
+        }
+
+        .dashed-divider {
+            border-top: 1.5px dashed #000000;
+            margin: 7px 0;
+        }
+
+        .solid-divider {
+            border-top: 2px solid #000000;
+            margin: 7px 0;
+        }
+
+        .rx-writing-lines {
+            background-image: repeating-linear-gradient(
+                transparent,
+                transparent 24px,
+                #334155 25px
+            );
+            min-height: 145px;
+            border: 1.5px solid #000000;
+            border-radius: 5px;
+            padding: 5px 7px;
+        }
+
+        .vitamin-card {
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .vitamin-card:hover {
+            transform: translateY(-1px);
+        }
+        .vitamin-card.selected {
+            border-color: #0d9488;
+            background-color: #f0fdfa;
+            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.14);
+        }
+
+        .kbd-shortcut {
+            font-family: monospace;
+            font-size: 10px;
+            padding: 1px 5px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased pb-16 lg:pb-6">
+
+    <!-- حاوية الإشعارات الذكية -->
+    <div id="toast-container" class="no-print fixed top-20 left-5 z-50 flex flex-col gap-2.5 max-w-sm w-full pointer-events-none"></div>
+
+    <!-- الشريط العلوي الاحترافي مع اللوجو -->
+    <header class="no-print bg-gradient-to-l from-pharmacy-950 via-pharmacy-900 to-pharmacy-800 text-white shadow-xl sticky top-0 z-40 border-b border-teal-700/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2.5">
+                <!-- هوية الصيدلية واللوجو -->
+                <div class="flex items-center gap-3.5">
+                    <div class="bg-white p-1.5 rounded-2xl shadow-md border-2 border-teal-300/60 shrink-0 flex items-center justify-center">
+                        <img src="https://lh3.googleusercontent.com/pw/AP1GczMgBfKJxdabsinqBeV3HDnAsuBvXa48IESifEzkIYs3GWayGfBbW2R2nOMmI3APezCOyMxJEvG_rq_VYzguidRNt56uF4afEKV9X0HwVpbHjc0EptdotnpwcUcDUh0X8cPewN8DE6uv9532Ti7PYI-n=w2499-h2131-s-no-gm?authuser=0"
+                             alt="شعار صيدلية دكتور وائل حافظ"
+                             class="h-11 sm:h-12 w-auto object-contain rounded-lg">
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h1 class="text-lg sm:text-xl font-black tracking-tight">صيدلية دكتور وائل حافظ</h1>
+                            <span class="px-2.5 py-0.5 text-xs font-black bg-amber-400 text-slate-950 rounded-full shadow-sm">فرع - ولاء</span>
+                        </div>
+                        <div class="text-teal-100 text-xs flex items-center gap-2.5 mt-0.5 flex-wrap">
+                            <span class="font-bold"><i class="fa-brands fa-whatsapp text-emerald-300 ml-1"></i> 01286766177</span>
+                            <span class="opacity-40">|</span>
+                            <span id="db-status-badge" class="inline-flex items-center gap-1.5 text-[11px] bg-black/30 px-2.5 py-0.5 rounded-full">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                <span>متصل بالنظام السحابي</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- أزرار التحكم السريعة -->
+                <div class="flex items-center gap-2 flex-wrap">
+                    <button type="button" onclick="openRecordsModal()" title="اختصار: Alt + R"
+                        class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3.5 py-2 bg-white/15 hover:bg-white/25 border border-white/25 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer">
+                        <i class="fa-solid fa-folder-open text-amber-300"></i>
+                        <span>سجل التقارير</span>
+                        <span id="saved-reports-count" class="bg-amber-400 text-slate-950 text-xs font-black px-2 py-0.5 rounded-full">0</span>
+                        <span class="kbd-shortcut hidden xl:inline">Alt+R</span>
+                    </button>
+
+                    <button type="button" onclick="resetFullForm(true)" title="اختصار: Alt + N"
+                        class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3.5 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-xs sm:text-sm font-bold shadow-sm transition cursor-pointer">
+                        <i class="fa-solid fa-file-circle-plus"></i>
+                        <span>تقرير جديد</span>
+                        <span class="kbd-shortcut hidden xl:inline">Alt+N</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- شريط التنقل السريع (Quick Jump Bar) للعمل بسرعات عالية -->
+        <div class="bg-pharmacy-950/90 border-t border-white/10 px-4 py-1.5">
+            <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 overflow-x-auto text-xs">
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <span class="text-teal-300 font-bold ml-1"><i class="fa-solid fa-bolt text-amber-400"></i> تنقل سريع:</span>
+                    <button type="button" onclick="quickJumpTo('section-client', 'client-name')" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-teal-600 text-white font-bold transition cursor-pointer">
+                        1. العميل <span class="opacity-60 text-[10px]">(Alt+1)</span>
+                    </button>
+                    <button type="button" onclick="quickJumpTo('section-vitamins', 'vitamin-search')" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-teal-600 text-white font-bold transition cursor-pointer">
+                        2. الفيتامينات <span class="opacity-60 text-[10px]">(Alt+2)</span>
+                    </button>
+                    <button type="button" onclick="quickJumpTo('section-meds', 'select-medication')" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-teal-600 text-white font-bold transition cursor-pointer">
+                        3. الأدوية Rx <span class="opacity-60 text-[10px]">(Alt+3)</span>
+                    </button>
+                </div>
+                <div class="hidden md:flex items-center gap-3 text-[11px] text-teal-200 shrink-0">
+                    <span><strong class="text-amber-300">Alt+S</strong> حفظ وتفريغ</span>
+                    <span>•</span>
+                    <span><strong class="text-amber-300">Alt+P</strong> حفظ وطباعة 80mm</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- شريط تنبيه وضع التعديل -->
+    <div id="edit-mode-banner" class="no-print hidden bg-amber-400 text-slate-950 border-b-2 border-amber-600 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <div class="flex items-center gap-2 font-extrabold text-sm">
+                <i class="fa-solid fa-pen-to-square text-lg"></i>
+                <span>وضع تعديل تقرير العميل: <strong id="edit-mode-client-name" class="underline">---</strong></span>
+            </div>
+            <button type="button" onclick="resetFullForm(true)" class="px-3.5 py-1 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-lg transition cursor-pointer">
+                <i class="fa-solid fa-xmark ml-1"></i> إلغاء التعديل والبدء بجديد
+            </button>
+        </div>
+    </div>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <!-- العمود الأيمن: إدخال البيانات السريع (7 أعمدة) -->
+            <div class="no-print lg:col-span-7 space-y-5">
+                
+                <!-- 1. بيانات العميل -->
+                <section id="section-client" class="scroll-mt-32 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="bg-gradient-to-l from-slate-50 to-teal-50/40 border-b border-slate-200 px-5 py-3.5 flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-9 h-9 rounded-xl bg-pharmacy-600 text-white flex items-center justify-center font-bold shadow-sm">
+                                <i class="fa-solid fa-user-check"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-base sm:text-lg font-extrabold text-slate-800">1. بيانات العميل الأساسية</h2>
+                                <p class="text-[11px] text-slate-500">اضغط Enter للانتقال السريع بين الخانات</p>
+                            </div>
+                        </div>
+                        <span id="bmi-badge" class="hidden px-3 py-1 rounded-xl text-xs font-black bg-blue-50 text-blue-700 border border-blue-200">
+                            BMI: --
+                        </span>
+                    </div>
+
+                    <div class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs sm:text-sm font-bold text-slate-700 mb-1">اسم العميل <span class="text-rose-500">*</span></label>
+                            <input type="text" id="client-name" data-next="client-phone" oninput="syncReceiptPreview()" placeholder="اكتب اسم العميل بالكامل..."
+                                class="fast-enter w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-pharmacy-500 focus:bg-white outline-none font-bold text-slate-900">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs sm:text-sm font-bold text-slate-700 mb-1">رقم الموبايل <span class="text-rose-500">*</span></label>
+                            <input type="tel" id="client-phone" data-next="client-address" oninput="syncReceiptPreview()" placeholder="01xxxxxxxxx" dir="ltr"
+                                class="fast-enter w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-pharmacy-500 focus:bg-white outline-none font-bold text-right text-slate-900">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs sm:text-sm font-bold text-slate-700 mb-1">العنوان</label>
+                            <input type="text" id="client-address" data-next="client-age" oninput="syncReceiptPreview()" placeholder="المنطقة / الشارع..."
+                                class="fast-enter w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-pharmacy-500 focus:bg-white outline-none font-bold text-slate-900">
+                        </div>
+
+                        <div class="sm:col-span-2 grid grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">السن (سنة)</label>
+                                <input type="number" id="client-age" data-next="client-weight" min="1" max="120" oninput="syncReceiptPreview()" placeholder="30"
+                                    class="fast-enter w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-pharmacy-500 focus:bg-white outline-none font-extrabold text-center text-slate-900">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">الوزن (كجم)</label>
+                                <input type="number" id="client-weight" data-next="client-height" min="2" max="300" step="0.5" oninput="syncReceiptPreview()" placeholder="75"
+                                    class="fast-enter w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-pharmacy-500 focus:bg-white outline-none font-extrabold text-center text-slate-900">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">الطول (سم)</label>
+                                <input type="number" id="client-height" data-next="vitamin-search" min="40" max="250" oninput="syncReceiptPreview()" placeholder="175"
+                                    class="fast-enter w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-pharmacy-500 focus:bg-white outline-none font-extrabold text-center text-slate-900">
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. تقرير الفيتامينات والمعادن -->
+                <section id="section-vitamins" class="scroll-mt-32 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="bg-gradient-to-l from-slate-50 to-amber-50/40 border-b border-slate-200 px-5 py-3.5">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold shadow-sm">
+                                    <i class="fa-solid fa-capsules"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-base sm:text-lg font-extrabold text-slate-800">2. الفيتامينات والمعادن (40 عنصر)</h2>
+                                    <p class="text-[11px] text-slate-500">بنقرة واحدة أضف العنصر للتقرير وعدّل ملاحظة الرعاية</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span id="selected-vitamins-counter" class="px-3 py-1.5 rounded-xl text-xs font-extrabold bg-pharmacy-600 text-white shadow-sm">
+                                    المختار: 0 عنصر
+                                </span>
+                                <button type="button" onclick="clearSelectedVitamins()" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-200 hover:bg-slate-300 text-slate-700 transition cursor-pointer">
+                                    إلغاء التحديد
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- بحث وتصفية الفيتامينات -->
+                        <div class="mt-3 flex flex-col sm:flex-row gap-2">
+                            <div class="relative flex-1">
+                                <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
+                                    <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                                </span>
+                                <input type="text" id="vitamin-search" oninput="renderVitaminsGrid()" placeholder="بحث سريع (دال، حديد، زنك، مغنيسيوم، أوميجا...)"
+                                    class="w-full pr-9 pl-3 py-2 text-sm bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-pharmacy-500 outline-none font-semibold">
+                            </div>
+                            <div class="flex gap-1.5 overflow-x-auto">
+                                <button type="button" onclick="setCategoryFilter('all')" id="filter-all" class="filter-btn px-3 py-2 rounded-xl text-xs font-bold bg-pharmacy-700 text-white whitespace-nowrap cursor-pointer">الكل (40)</button>
+                                <button type="button" onclick="setCategoryFilter('vitamin')" id="filter-vitamin" class="filter-btn px-3 py-2 rounded-xl text-xs font-bold bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 whitespace-nowrap cursor-pointer">فيتامينات</button>
+                                <button type="button" onclick="setCategoryFilter('mineral')" id="filter-mineral" class="filter-btn px-3 py-2 rounded-xl text-xs font-bold bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 whitespace-nowrap cursor-pointer">معادن</button>
+                                <button type="button" onclick="setCategoryFilter('essential')" id="filter-essential" class="filter-btn px-3 py-2 rounded-xl text-xs font-bold bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 whitespace-nowrap cursor-pointer">مكملات</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- شبكة بطاقات الفيتامينات -->
+                    <div id="vitamins-grid" class="p-4 grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[440px] overflow-y-auto"></div>
+
+                    <!-- إضافة عنصر مخصص -->
+                    <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row gap-2">
+                        <input type="text" id="custom-element-name" placeholder="إضافة فيتامين أو تحليل مخصص..."
+                            class="flex-1 px-3.5 py-2 text-xs sm:text-sm bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-pharmacy-500 outline-none font-semibold">
+                        <input type="text" id="custom-element-note" onkeydown="if(event.key==='Enter'){event.preventDefault(); addCustomElement();}" placeholder="ملاحظة الرعاية (اختياري)"
+                            class="flex-1 px-3.5 py-2 text-xs sm:text-sm bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-pharmacy-500 outline-none font-semibold">
+                        <button type="button" onclick="addCustomElement()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs sm:text-sm font-bold rounded-xl transition cursor-pointer shrink-0">
+                            <i class="fa-solid fa-plus ml-1"></i> إضافة للتقرير
+                        </button>
+                    </div>
+                </section>
+
+                <!-- 3. الأدوية والوصفة الطبية (Rx) -->
+                <section id="section-meds" class="scroll-mt-32 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="bg-gradient-to-l from-slate-50 to-indigo-50/40 border-b border-slate-200 px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold shadow-sm">
+                                <i class="fa-solid fa-prescription-bottle-medical"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-base sm:text-lg font-extrabold text-slate-800">3. الأدوية والوصفة الطبية (Rx)</h2>
+                                <p class="text-[11px] text-slate-500">إضافة سريعة للأدوية والجرعات وحساب الإجمالي</p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="toggleAddMedDrawer()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold rounded-xl shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer">
+                            <i class="fa-solid fa-plus-circle"></i>
+                            <span>تسجيل دواء جديد بالقاعدة</span>
+                        </button>
+                    </div>
+
+                    <!-- درج تسجيل دواء جديد -->
+                    <div id="add-med-drawer" class="hidden bg-indigo-50/90 border-b border-indigo-200 p-5 space-y-3.5">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-sm font-extrabold text-indigo-950">إضافة منتج / دواء جديد لقاعدة الصيدلية</h3>
+                            <button type="button" onclick="toggleAddMedDrawer()" class="text-slate-500 hover:text-slate-800 cursor-pointer">
+                                <i class="fa-solid fa-xmark text-lg"></i>
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-bold text-slate-700 mb-1">اسم المنتج / الدواء <span class="text-rose-500">*</span></label>
+                                <input type="text" id="new-med-name" placeholder="مثال: Limitless Ossofortin 10000"
+                                    class="w-full px-3.5 py-2 text-sm bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-bold">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">السعر (ج.م) <span class="text-rose-500">*</span></label>
+                                <input type="number" id="new-med-price" min="0" step="0.5" placeholder="120"
+                                    class="w-full px-3.5 py-2 text-sm bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-center">
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-3.5 rounded-xl border border-indigo-200 space-y-2">
+                            <label class="block text-xs font-extrabold text-slate-700">أضف جرعة أو أكثر لهذا الدواء:</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="new-med-dosage-input" onkeydown="if(event.key==='Enter'){event.preventDefault(); addTempDosage();}" placeholder="اكتب الجرعة (مثال: قرص واحد بعد الإفطار)..."
+                                    class="flex-1 px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-semibold">
+                                <button type="button" onclick="addTempDosage()" class="px-3.5 py-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-800 text-xs font-extrabold rounded-xl transition cursor-pointer shrink-0">
+                                    <i class="fa-solid fa-plus ml-1"></i> إضافة جرعة
+                                </button>
+                            </div>
+                            <div id="temp-dosages-list" class="flex flex-wrap gap-2 pt-1">
+                                <span class="text-[11px] text-slate-400">لم يتم إضافة جرعات بعد</span>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end">
+                            <button type="button" onclick="saveNewMedicationToFirebase()" id="btn-save-med" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-extrabold rounded-xl shadow-sm transition flex items-center gap-2 cursor-pointer">
+                                <i class="fa-solid fa-floppy-disk"></i>
+                                <span>حفظ الدواء في قاعدة البيانات</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- اختيار دواء وجرعته -->
+                    <div class="p-5 space-y-4">
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+                                <div class="sm:col-span-5">
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">اختر المنتج / الدواء:</label>
+                                    <select id="select-medication" onchange="onMedicationSelectChange()" class="w-full px-3 py-2.5 text-sm bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-bold">
+                                        <option value="">-- اختر الدواء --</option>
+                                    </select>
+                                </div>
+                                <div class="sm:col-span-5">
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">اختر الجرعة المناسبة:</label>
+                                    <select id="select-medication-dosage" onchange="onDosageSelectChange()" class="w-full px-3 py-2.5 text-sm bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-bold">
+                                        <option value="">-- اختر الدواء أولاً --</option>
+                                    </select>
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <button type="button" onclick="addMedicationToReport()" class="w-full py-2.5 px-3 bg-pharmacy-600 hover:bg-pharmacy-700 text-white text-xs sm:text-sm font-extrabold rounded-xl shadow-sm transition flex items-center justify-center gap-1 cursor-pointer">
+                                        <i class="fa-solid fa-plus"></i>
+                                        <span>إضافة</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="custom-dosage-wrapper" class="hidden">
+                                <input type="text" id="custom-dosage-text" onkeydown="if(event.key==='Enter'){event.preventDefault(); addMedicationToReport();}" placeholder="اكتب الجرعة المخصصة لهذا العميل..."
+                                    class="w-full px-3.5 py-2 text-xs sm:text-sm bg-white border border-indigo-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-semibold">
+                            </div>
+                        </div>
+
+                        <!-- الأدوية المختارة حالياً -->
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-extrabold text-slate-700">الأدوية المختارة للعميل في الوصفة (Rx):</span>
+                                <span id="meds-total-badge" class="text-xs font-black text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-200">
+                                    الإجمالي: 0 ج.م
+                                </span>
+                            </div>
+                            <div id="selected-medications-list" class="space-y-2"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- أزرار الحفظ والطباعة السريعة -->
+                <div class="bg-white p-4 rounded-2xl shadow-md border border-slate-200 flex flex-col sm:flex-row gap-3">
+                    <button type="button" id="btn-save-db" onclick="saveReportToFirebase(true)" class="flex-1 py-3.5 px-5 bg-pharmacy-700 hover:bg-pharmacy-800 text-white font-extrabold rounded-xl shadow-md transition flex items-center justify-center gap-2 text-sm sm:text-base cursor-pointer">
+                        <i class="fa-solid fa-cloud-arrow-up text-lg"></i>
+                        <span id="btn-save-db-text">حفظ وتفريغ الخانات (Alt+S)</span>
+                    </button>
+                    <button type="button" onclick="saveAndPrintReceipt()" class="flex-1 py-3.5 px-5 bg-slate-900 hover:bg-black text-white font-extrabold rounded-xl shadow-md transition flex items-center justify-center gap-2 text-sm sm:text-base cursor-pointer">
+                        <i class="fa-solid fa-print text-lg text-amber-400"></i>
+                        <span id="btn-save-print-text">حفظ وطباعة 80mm (Alt+P)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- العمود الأيسر: قسم الطباعة الحرارية 80mm المظبوط (5 أعمدة) -->
+            <div id="print-wrapper-column" class="lg:col-span-5 lg:sticky lg:top-28 space-y-3.5">
+                
+                <!-- شريط التحكم بالطباعة -->
+                <div class="no-print bg-white p-3.5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-9 h-9 rounded-xl bg-slate-900 text-amber-400 flex items-center justify-center shadow-sm">
+                            <i class="fa-solid fa-receipt"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-extrabold text-slate-800 text-sm sm:text-base">معاينة الطباعة الحرارية (80mm)</h3>
+                            <p class="text-[11px] text-slate-500">توسيط تلقائي + هوامش 0.5 سم يمين ويسار</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="triggerThermalPrint()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black rounded-xl shadow-sm transition flex items-center gap-2 text-xs sm:text-sm cursor-pointer">
+                        <i class="fa-solid fa-print"></i>
+                        <span>طباعة فورية</span>
+                    </button>
+                </div>
+
+                <!-- حاوية الإيصال الحراري 80mm -->
+                <div id="receipt-preview-stage" class="flex justify-center bg-slate-200/80 p-4 rounded-2xl border border-dashed border-slate-300 overflow-x-auto">
+                    <div id="thermal-receipt-container" class="thermal-paper rounded-b-lg">
+                        
+                        <!-- رأس الإيصال مع الشعار الرسمي للصيدلية -->
+                        <div class="text-center pb-1">
+                            <img id="receipt-logo-img"
+                                 src="https://lh3.googleusercontent.com/pw/AP1GczMgBfKJxdabsinqBeV3HDnAsuBvXa48IESifEzkIYs3GWayGfBbW2R2nOMmI3APezCOyMxJEvG_rq_VYzguidRNt56uF4afEKV9X0HwVpbHjc0EptdotnpwcUcDUh0X8cPewN8DE6uv9532Ti7PYI-n=w2499-h2131-s-no-gm?authuser=0"
+                                 alt="شعار صيدلية دكتور وائل حافظ"
+                                 class="h-14 w-auto mx-auto mb-1 object-contain">
+                            <h1 class="text-[15px] font-black leading-tight text-black">صيدلية دكتور وائل حافظ</h1>
+                            <p class="text-[11px] font-black text-black mt-0.5 inline-block px-2.5 py-0.5 rounded border border-black">فرع - ولاء</p>
+                            <p class="text-[11px] font-extrabold text-black mt-1" dir="ltr">
+                                <i class="fa-brands fa-whatsapp"></i> 01286766177
+                            </p>
+                            <p class="text-[10px] font-bold text-black mt-0.5" id="receipt-date">--/--/---- --:--</p>
+                        </div>
+
+                        <div class="solid-divider"></div>
+
+                        <div class="text-center my-1">
+                            <span class="text-[11px] font-black border border-black px-3 py-0.5 rounded-full">
+                                تقرير المتابعة والرعاية الصحية
+                            </span>
+                        </div>
+
+                        <!-- بيانات العميل: التسمية بجوار البيانات مباشرة بدون فراغ واسع -->
+                        <div class="text-[11.5px] space-y-1 mt-2 text-black">
+                            <div class="flex items-baseline justify-start gap-1.5 border-b border-dotted border-black pb-0.5">
+                                <span class="font-bold shrink-0">اسم العميل:</span>
+                                <span class="font-black text-right break-words" id="rec-name">---</span>
+                            </div>
+                            <div class="flex items-baseline justify-start gap-1.5 border-b border-dotted border-black pb-0.5">
+                                <span class="font-bold shrink-0">رقم الموبايل:</span>
+                                <span class="font-extrabold" dir="ltr" id="rec-phone">---</span>
+                            </div>
+                            <div class="flex items-baseline justify-start gap-1.5 border-b border-dotted border-black pb-0.5">
+                                <span class="font-bold shrink-0">العنوان:</span>
+                                <span class="font-bold text-right break-words" id="rec-address">---</span>
+                            </div>
+                            
+                            <div class="grid grid-cols-3 gap-1 pt-1 text-center">
+                                <div class="border border-black rounded p-1">
+                                    <div class="text-[9.5px] font-bold">السن</div>
+                                    <div class="font-black text-[11px]" id="rec-age">--</div>
+                                </div>
+                                <div class="border border-black rounded p-1">
+                                    <div class="text-[9.5px] font-bold">الوزن</div>
+                                    <div class="font-black text-[11px]" id="rec-weight">--</div>
+                                </div>
+                                <div class="border border-black rounded p-1">
+                                    <div class="text-[9.5px] font-bold">الطول</div>
+                                    <div class="font-black text-[11px]" id="rec-height">--</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="dashed-divider"></div>
+
+                        <!-- العناصر التي تحتاج رعاية -->
+                        <div class="my-1.5">
+                            <h2 class="text-[11.5px] font-black text-black mb-1 flex items-center justify-start gap-1.5">
+                                <span><i class="fa-solid fa-notes-medical ml-1"></i> العناصر التي تحتاج رعاية:</span>
+                                <span id="rec-items-count" class="text-[10px] font-black border border-black px-1.5 rounded">0</span>
+                            </h2>
+                            <div id="rec-vitamins-list" class="space-y-1 text-[11px]"></div>
+                        </div>
+
+                        <div class="dashed-divider"></div>
+
+                        <!-- الوصفة الطبية (Rx) -->
+                        <div class="my-1.5">
+                            <div class="flex items-center justify-start gap-2 mb-1">
+                                <span class="text-[11.5px] font-black text-black flex items-center gap-1">
+                                    <span class="text-sm font-serif italic font-black">Rx</span>
+                                    <span>الوصفة الطبية:</span>
+                                </span>
+                                <span id="rec-meds-total" class="hidden text-[10px] font-black border border-black px-1.5 rounded">0 ج.م</span>
+                            </div>
+                            <div id="rec-medications-list" class="space-y-1 mb-1.5"></div>
+                            <div class="rx-writing-lines" id="rx-manual-box"></div>
+                        </div>
+
+                        <div class="dashed-divider"></div>
+
+                        <!-- رمز QR للواتساب -->
+                        <div class="text-center pt-1 pb-1">
+                            <p class="text-[10.5px] font-extrabold text-black mb-1">
+                                امسح الكود للتواصل عبر واتساب الصيدلية
+                            </p>
+                            <div class="flex justify-center my-1">
+                                <div class="p-1.5 bg-white border-2 border-black rounded-lg inline-block">
+                                    <img id="whatsapp-qr-img" alt="WhatsApp QR Code" class="w-[115px] h-[115px] block mx-auto" />
+                                </div>
+                            </div>
+                            <a href="https://wa.me/201286766177" target="_blank" rel="noopener noreferrer" class="no-print inline-block text-[11px] font-bold text-emerald-700 underline mb-1">
+                                اختبار فتح رابط الواتساب (01286766177)
+                            </a>
+                            <p class="text-[11px] font-black text-black mt-0.5" dir="ltr">WhatsApp: 01286766177</p>
+                            <p class="text-[10px] font-bold text-black mt-0.5">
+                                نتمنى لكم دوام الصحة والعافية
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- شريط اختصارات سفلي عائم للهواتف والأجهزة اللوحية -->
+    <div class="no-print lg:hidden fixed bottom-0 inset-x-0 bg-slate-900 text-white border-t border-slate-700 px-3 py-2 z-40 flex items-center justify-around gap-2 shadow-2xl">
+        <button type="button" onclick="quickJumpTo('section-client', 'client-name')" class="flex flex-col items-center text-[11px] font-bold text-slate-200 hover:text-amber-400">
+            <i class="fa-solid fa-user text-sm mb-0.5"></i>
+            <span>العميل</span>
+        </button>
+        <button type="button" onclick="quickJumpTo('section-vitamins', 'vitamin-search')" class="flex flex-col items-center text-[11px] font-bold text-slate-200 hover:text-amber-400">
+            <i class="fa-solid fa-capsules text-sm mb-0.5"></i>
+            <span>الفيتامينات</span>
+        </button>
+        <button type="button" onclick="quickJumpTo('section-meds', 'select-medication')" class="flex flex-col items-center text-[11px] font-bold text-slate-200 hover:text-amber-400">
+            <i class="fa-solid fa-pills text-sm mb-0.5"></i>
+            <span>الأدوية</span>
+        </button>
+        <button type="button" onclick="saveAndPrintReceipt()" class="px-3.5 py-1.5 bg-amber-500 text-slate-950 rounded-xl text-xs font-black flex items-center gap-1.5 shadow">
+            <i class="fa-solid fa-print"></i>
+            <span>طباعة</span>
+        </button>
+    </div>
+
+    <!-- نافذة سجل التقارير المحفوظة (Modal) -->
+    <div id="records-modal" class="no-print fixed inset-0 z-50 hidden bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-4xl w-full max-h-[88vh] flex flex-col overflow-hidden">
+            <div class="px-6 py-4 bg-pharmacy-900 text-white flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <img src="https://lh3.googleusercontent.com/pw/AP1GczMgBfKJxdabsinqBeV3HDnAsuBvXa48IESifEzkIYs3GWayGfBbW2R2nOMmI3APezCOyMxJEvG_rq_VYzguidRNt56uF4afEKV9X0HwVpbHjc0EptdotnpwcUcDUh0X8cPewN8DE6uv9532Ti7PYI-n=w2499-h2131-s-no-gm?authuser=0"
+                         alt="Logo" class="h-9 w-auto bg-white p-1 rounded-lg">
+                    <div>
+                        <h3 class="text-lg font-extrabold">سجل تقارير العملاء المحفوظة</h3>
+                        <p class="text-xs text-teal-200">طباعة فورية أو تعديل أي تقرير سابق بضغطة واحدة</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeRecordsModal()" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition cursor-pointer">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="p-4 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row gap-3">
+                <div class="relative flex-1">
+                    <span class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" id="records-search-input" oninput="filterSavedRecords()" placeholder="ابحث باسم العميل أو رقم الموبايل..."
+                        class="w-full pr-10 pl-4 py-2.5 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-pharmacy-500 outline-none text-sm font-semibold">
+                </div>
+                <button type="button" onclick="fetchReportsFromFirebase()" class="px-4 py-2.5 bg-pharmacy-600 hover:bg-pharmacy-700 text-white text-sm font-bold rounded-xl transition flex items-center justify-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-rotate"></i>
+                    <span>تحديث</span>
+                </button>
+            </div>
+
+            <div id="records-list-container" class="p-5 overflow-y-auto space-y-3 flex-1 bg-slate-100"></div>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         البرمجة الكاملة والاختصارات الذكية
+         ===================================================================== -->
+    <script>
+        const FIREBASE_DB_URL = "https://costmar-96349-default-rtdb.firebaseio.com";
+        const PHARMACY_WHATSAPP_NUMBER = "201286766177";
+
+        // موسوعة شاملة تضم 40 عنصراً من الفيتامينات والمعادن والأحماض الأساسية
+        const VITAMINS_AND_MINERALS = [
+            { id: "vit_d3", name: "فيتامين د3 (Vitamin D3)", category: "vitamin", role: "صحة العظام والمناعة وامتصاص الكالسيوم والحالة المزاجية", defaultNote: "يحتاج دعم لتعزيز المناعة وصحة العظام" },
+            { id: "vit_b12", name: "فيتامين ب12 (Vitamin B12)", category: "vitamin", role: "صحة الأعصاب وتكوين خلايا الدم الحمراء والطاقة والتركيز", defaultNote: "رعاية خاصة للأعصاب والنشاط الذهني" },
+            { id: "vit_b_complex", name: "مجموعة فيتامين ب المركب (B-Complex)", category: "vitamin", role: "إنتاج الطاقة الخلوية وتقليل الإجهاد البدني والعصبي", defaultNote: "دعم الطاقة والتمثيل الغذائي" },
+            { id: "vit_b1", name: "فيتامين ب1 - ثيامين (Vitamin B1)", category: "vitamin", role: "دعم وظائف الأعصاب الطرفية وتحويل الكربوهيدرات لطاقة", defaultNote: "دعم الأعصاب الطرفية والنشاط" },
+            { id: "vit_b2", name: "فيتامين ب2 - ريبوفلافين (Vitamin B2)", category: "vitamin", role: "صحة العين والجلد وإنتاج الطاقة الخلوية وتقليل الصداع", defaultNote: "دعم صحة الجلد والأغشية المخاطية" },
+            { id: "vit_b3", name: "فيتامين ب3 - نياسين (Vitamin B3)", category: "vitamin", role: "تحسين الدورة الدموية وصحة الجلد وتوازن الدهون", defaultNote: "دعم صحة القلب والجلد" },
+            { id: "vit_b5", name: "فيتامين ب5 - بانتوثينيك (Vitamin B5)", category: "vitamin", role: "تصنيع الهرمونات ومقاومة الإجهاد وصحة البشرة", defaultNote: "دعم الغدة الكظرية ومقاومة الإجهاد" },
+            { id: "vit_b6", name: "فيتامين ب6 - بيريدوكسين (Vitamin B6)", category: "vitamin", role: "تصنيع النواقل العصبية وتوازن الهرمونات وتخفيف التوتر", defaultNote: "دعم الجهاز العصبي والتوازن الهرموني" },
+            { id: "vit_c", name: "فيتامين سي (Vitamin C)", category: "vitamin", role: "مضاد أكسدة قوي، تقوية المناعة، وامتصاص الحديد ونضارة البشرة", defaultNote: "تعزيز المناعة ومقاومة الإجهاد التأكسدي" },
+            { id: "vit_a", name: "فيتامين أ (Vitamin A)", category: "vitamin", role: "صحة الإبصار والنظر وتجديد خلايا الجلد والأغشية المخاطية", defaultNote: "دعم صحة العين والجلد" },
+            { id: "vit_e", name: "فيتامين هـ (Vitamin E)", category: "vitamin", role: "حماية الخلايا من الأكسدة وصحة القلب والأوعية الدموية والجلد", defaultNote: "مضاد أكسدة لدعم الدورة الدموية" },
+            { id: "vit_k1", name: "فيتامين ك1 (Vitamin K1)", category: "vitamin", role: "تنظيم عوامل التجلط الطبيعية ومنع النزيف", defaultNote: "دعم وظائف التجلط الطبيعية" },
+            { id: "vit_k2", name: "فيتامين ك2 (Vitamin K2 - MK7)", category: "vitamin", role: "توجيه الكالسيوم للعظام ومنع ترسبه في الشرايين", defaultNote: "ضروري مع فيتامين د لصحة العظام والقلب" },
+            { id: "folic_acid", name: "حمض الفوليك (Folic Acid - B9)", category: "vitamin", role: "تكوين الحمض النووي وكرات الدم الحمراء وصحة الخلايا", defaultNote: "دعم تكوين الدم وتجديد الخلايا" },
+            { id: "biotin", name: "البيوتين (Biotin - B7)", category: "vitamin", role: "تقوية بصيلات الشعر والأظافر وصحة البشرة", defaultNote: "رعاية مكثفة للشعر والأظافر" },
+            { id: "choline", name: "الكولين (Choline)", category: "vitamin", role: "صحة الكبد والذاكرة ووظائف المخ والناقل العصبي أستيل كولين", defaultNote: "دعم صحة الكبد والتركيز الذهني" },
+            { id: "inositol", name: "الإينوزيتول (Inositol - B8)", category: "vitamin", role: "تحسين حساسية الإنسولين وتوازن الهرمونات والمزاج", defaultNote: "دعم التوازن الهرموني والتمثيل الغذائي" },
+
+            { id: "iron", name: "الحديد (Iron)", category: "mineral", role: "نقل الأكسجين في الدم والوقاية من الأنيميا والإرهاق المستمر", defaultNote: "يحتاج رعاية لعلاج أو الوقاية من الأنيميا" },
+            { id: "zinc", name: "الزنك (Zinc)", category: "mineral", role: "المناعة، التئام الجروح، صحة الشعر والجلد، والخصوبة", defaultNote: "دعم المناعة وصحة الشعر والجلد" },
+            { id: "magnesium", name: "المغنيسيوم (Magnesium)", category: "mineral", role: "استرخاء العضلات والأعصاب، جودة النوم، وتنظيم ضغط الدم", defaultNote: "لتخفيف الشد العضلي وتحسين النوم" },
+            { id: "calcium", name: "الكالسيوم (Calcium)", category: "mineral", role: "بناء وكثافة العظام والأسنان وانقباض العضلات", defaultNote: "دعم كثافة العظام والأسنان" },
+            { id: "potassium", name: "البوتاسيوم (Potassium)", category: "mineral", role: "توازن السوائل، تنظيم ضربات القلب، ومنع التقلصات العضلية", defaultNote: "تنظيم توازن الأملاح والعضلات" },
+            { id: "selenium", name: "السيلينيوم (Selenium)", category: "mineral", role: "وظائف الغدة الدرقية ومضاد أكسدة قوي لحماية المناعة", defaultNote: "دعم وظائف الغدة الدرقية والمناعة" },
+            { id: "iodine", name: "اليود (Iodine)", category: "mineral", role: "أساسي لإنتاج هرمونات الغدة الدرقية وتنظيم الحرق", defaultNote: "دعم نشاط الغدة الدرقية" },
+            { id: "copper", name: "النحاس (Copper)", category: "mineral", role: "تكوين الكولاجين وامتصاص الحديد وصحة الأعصاب", defaultNote: "موازنة المعادن ودعم تكوين الدم" },
+            { id: "chromium", name: "الكروميوم (Chromium)", category: "mineral", role: "تحسين حساسية الإنسولين وتنظيم مستوى السكر في الدم", defaultNote: "دعم توازن السكر والتمثيل الغذائي" },
+            { id: "phosphorus", name: "الفوسفور (Phosphorus)", category: "mineral", role: "بناء العظام والأسنان وإنتاج الطاقة الخلوية (ATP)", defaultNote: "دعم صحة العظام وإنتاج الطاقة" },
+            { id: "manganese", name: "المنجنيز (Manganese)", category: "mineral", role: "تكوين الغضاريف والعظام ومضاد أكسدة للخلايا", defaultNote: "دعم صحة المفاصل والعظام" },
+            { id: "boron", name: "البورون (Boron)", category: "mineral", role: "تحسين امتصاص المغنيسيوم وفيتامين د ودعم صحة المفاصل", defaultNote: "تعزيز الاستفادة من فيتامين د والكالسيوم" },
+            { id: "molybdenum", name: "الموليبدينوم (Molybdenum)", category: "mineral", role: "تنشيط الإنزيمات المسؤولة عن تنقية الجسم من السموم", defaultNote: "دعم وظائف الإنزيمات الحيوية" },
+
+            { id: "omega_3", name: "أوميجا 3 (Omega-3 EPA/DHA)", category: "essential", role: "صحة القلب، تقليل الالتهابات، والتركيز والذاكرة", defaultNote: "دعم صحة القلب والذاكرة والمفاصل" },
+            { id: "coq10", name: "كيو 10 (Coenzyme Q10)", category: "essential", role: "إنتاج الطاقة لعضلة القلب ومقاومة الإجهاد البدني", defaultNote: "دعم طاقة القلب والنشاط البدني" },
+            { id: "collagen", name: "الكولاجين (Collagen)", category: "essential", role: "مرونة المفاصل والغضاريف ونضارة وشد البشرة", defaultNote: "دعم المفاصل ومرونة الجلد" },
+            { id: "probiotics", name: "البروبيوتيك (Probiotics)", category: "essential", role: "توازن البكتيريا النافعة وتحسين الهضم والامتصاص والمناعة", defaultNote: "تحسين صحة الجهاز الهضمي والامتصاص" },
+            { id: "l_carnitine", name: "إل-كارنيتين (L-Carnitine)", category: "essential", role: "نقل الأحماض الدهنية لإنتاج الطاقة ودعم الأداء العضلي", defaultNote: "دعم حرق الدهون والطاقة البدنية" },
+            { id: "l_arginine", name: "إل-أرجينين (L-Arginine)", category: "essential", role: "تحسين تدفق الدم وتوسيع الأوعية الدموية والنشاط البدني", defaultNote: "دعم الدورة الدموية والنشاط" },
+            { id: "glutathione", name: "الجلوتاثيون (Glutathione)", category: "essential", role: "أقوى مضاد أكسدة داخلي لتنقية الكبد ونضارة البشرة", defaultNote: "دعم وظائف الكبد ومقاومة الأكسدة" },
+            { id: "alpha_lipoic", name: "حمض ألفا ليبويك (Alpha Lipoic Acid)", category: "essential", role: "حماية الأعصاب الطرفية وتنظيم سكر الدم ومضاد أكسدة", defaultNote: "رعاية خاصة للأعصاب الطرفية" },
+            { id: "lutein", name: "اللوتين وزياكسانثين (Lutein)", category: "essential", role: "حماية شبكية العين من الإجهاد الضوئي والشاشات", defaultNote: "دعم صحة الشبكية والنظر" },
+            { id: "melatonin", name: "الميلاتونين (Melatonin)", category: "essential", role: "تنظيم الساعة البيولوجية وتحسين جودة النوم العميق", defaultNote: "تنظيم النوم والراحة الليلية" }
+        ];
+
+        let allItems = [...VITAMINS_AND_MINERALS];
+        let selectedItemsMap = new Map();
+        let currentCategoryFilter = 'all';
+        let savedReportsList = [];
+        let editingReportKey = null;
+
+        let pharmacyMedications = [];
+        let tempNewDosages = [];
+        let selectedReportMedications = [];
+
+        // تهيئة التطبيق وربط اختصارات لوحة المفاتيح السريعة
+        window.addEventListener('DOMContentLoaded', () => {
+            generateWhatsAppQRCode();
+            updateReceiptTimestamp();
+            renderVitaminsGrid();
+            syncReceiptPreview();
+            fetchReportsFromFirebase();
+            fetchMedicationsFromFirebase();
+            setupFastNavigationAndShortcuts();
+            setInterval(updateReceiptTimestamp, 60000);
+        });
+
+        // إعداد التنقل السريع بالـ Enter واختصارات لوحة المفاتيح Alt + Key
+        function setupFastNavigationAndShortcuts() {
+            // الانتقال بالـ Enter بين حقول بيانات العميل
+            document.querySelectorAll('.fast-enter').forEach(input => {
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const nextId = input.getAttribute('data-next');
+                        if (nextId) {
+                            const nextEl = document.getElementById(nextId);
+                            if (nextEl) {
+                                nextEl.focus();
+                                nextEl.select?.();
+                            }
+                        }
+                    }
+                });
+            });
+
+            // اختصارات لوحة المفاتيح العالمية للعمل بسرعات عالية
+            document.addEventListener('keydown', (e) => {
+                if (e.altKey) {
+                    const key = e.key.toLowerCase();
+                    if (key === '1') {
+                        e.preventDefault();
+                        quickJumpTo('section-client', 'client-name');
+                    } else if (key === '2') {
+                        e.preventDefault();
+                        quickJumpTo('section-vitamins', 'vitamin-search');
+                    } else if (key === '3') {
+                        e.preventDefault();
+                        quickJumpTo('section-meds', 'select-medication');
+                    } else if (key === 's' || key === 'س') {
+                        e.preventDefault();
+                        saveReportToFirebase(true);
+                    } else if (key === 'p' || key === 'ح') {
+                        e.preventDefault();
+                        saveAndPrintReceipt();
+                    } else if (key === 'n' || key === 'ى') {
+                        e.preventDefault();
+                        resetFullForm(true);
+                    } else if (key === 'r' || key === 'ق') {
+                        e.preventDefault();
+                        openRecordsModal();
+                    }
+                } else if (e.key === 'Escape') {
+                    closeRecordsModal();
+                }
+            });
+        }
+
+        function quickJumpTo(sectionId, focusInputId) {
+            const sec = document.getElementById(sectionId);
+            if (sec) {
+                sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            if (focusInputId) {
+                setTimeout(() => {
+                    const el = document.getElementById(focusInputId);
+                    if (el) el.focus();
+                }, 220);
+            }
+        }
+
+        // توليد رمز QR Code عالي الدقة بصيغة DataURL مضمونة للطباعة
+        function generateWhatsAppQRCode() {
+            const qrImg = document.getElementById('whatsapp-qr-img');
+            const waUrl = `https://wa.me/${PHARMACY_WHATSAPP_NUMBER}`;
+            try {
+                if (typeof QRious !== 'undefined') {
+                    const qr = new QRious({
+                        value: waUrl,
+                        size: 240,
+                        level: 'M',
+                        background: '#ffffff',
+                        foreground: '#000000'
+                    });
+                    qrImg.src = qr.toDataURL('image/png');
+                } else {
+                    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(waUrl)}`;
+                }
+            } catch (e) {
+                qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(waUrl)}`;
+            }
+        }
+
+        function updateReceiptTimestamp() {
+            const now = new Date();
+            const formatted = now.toLocaleDateString('ar-EG', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            document.getElementById('receipt-date').textContent = formatted;
+        }
+
+        // عرض بطاقات الفيتامينات والمعادن
+        function renderVitaminsGrid() {
+            const grid = document.getElementById('vitamins-grid');
+            const searchQuery = document.getElementById('vitamin-search').value.trim().toLowerCase();
+
+            const filtered = allItems.filter(item => {
+                const matchesCategory = currentCategoryFilter === 'all' || item.category === currentCategoryFilter;
+                const matchesSearch = item.name.toLowerCase().includes(searchQuery) || item.role.toLowerCase().includes(searchQuery);
+                return matchesCategory && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-8 text-slate-400 font-bold">لا توجد نتائج مطابقة للبحث</div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(item => {
+                const isSelected = selectedItemsMap.has(item.id);
+                const selectedData = selectedItemsMap.get(item.id);
+                const noteValue = isSelected ? selectedData.careNote : item.defaultNote;
+
+                const categoryLabels = {
+                    vitamin: { text: 'فيتامين', bg: 'bg-teal-100 text-teal-800' },
+                    mineral: { text: 'معدن', bg: 'bg-amber-100 text-amber-800' },
+                    essential: { text: 'مكمل', bg: 'bg-indigo-100 text-indigo-800' }
+                };
+                const badge = categoryLabels[item.category] || categoryLabels.essential;
+
+                return `
+                    <div onclick="toggleVitaminSelection('${item.id}')" class="vitamin-card cursor-pointer rounded-xl border-2 p-3 ${isSelected ? 'selected border-pharmacy-600' : 'border-slate-200 bg-white hover:border-slate-300'}">
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="flex items-start gap-2">
+                                <div class="mt-0.5 w-5 h-5 rounded-md flex items-center justify-center border shrink-0 ${isSelected ? 'bg-pharmacy-600 border-pharmacy-600 text-white' : 'border-slate-300 bg-slate-50'}">
+                                    ${isSelected ? '<i class="fa-solid fa-check text-xs"></i>' : ''}
+                                </div>
+                                <div>
+                                    <h4 class="font-extrabold text-xs sm:text-sm text-slate-800 leading-snug">${escapeHtml(item.name)}</h4>
+                                    <p class="text-[11px] text-slate-500 mt-0.5 leading-relaxed">${escapeHtml(item.role)}</p>
+                                </div>
+                            </div>
+                            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full shrink-0 ${badge.bg}">${badge.text}</span>
+                        </div>
+                        ${isSelected ? `
+                            <div class="mt-2 pt-2 border-t border-teal-200" onclick="event.stopPropagation()">
+                                <label class="block text-[10px] font-bold text-pharmacy-800 mb-0.5">توصية الرعاية:</label>
+                                <input type="text" value="${escapeHtml(noteValue)}" oninput="updateVitaminNote('${item.id}', this.value)"
+                                    class="w-full px-2.5 py-1 text-xs bg-white border border-teal-300 rounded-lg focus:ring-2 focus:ring-pharmacy-500 outline-none font-bold text-slate-800">
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function setCategoryFilter(category) {
+            currentCategoryFilter = category;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.className = 'filter-btn px-3 py-2 rounded-xl text-xs font-bold bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 whitespace-nowrap cursor-pointer';
+            });
+            const activeBtn = document.getElementById(`filter-${category}`);
+            if (activeBtn) {
+                activeBtn.className = 'filter-btn px-3 py-2 rounded-xl text-xs font-bold bg-pharmacy-700 text-white whitespace-nowrap cursor-pointer';
+            }
+            renderVitaminsGrid();
+        }
+
+        function toggleVitaminSelection(id) {
+            if (selectedItemsMap.has(id)) {
+                selectedItemsMap.delete(id);
+            } else {
+                const item = allItems.find(i => i.id === id);
+                if (item) {
+                    selectedItemsMap.set(id, {
+                        id: item.id,
+                        name: item.name,
+                        careNote: item.defaultNote
+                    });
+                }
+            }
+            renderVitaminsGrid();
+            syncReceiptPreview();
+        }
+
+        function updateVitaminNote(id, newNote) {
+            if (selectedItemsMap.has(id)) {
+                const current = selectedItemsMap.get(id);
+                current.careNote = newNote;
+                selectedItemsMap.set(id, current);
+                syncReceiptPreview();
+            }
+        }
+
+        function clearSelectedVitamins() {
+            selectedItemsMap.clear();
+            renderVitaminsGrid();
+            syncReceiptPreview();
+        }
+
+        function addCustomElement() {
+            const nameInput = document.getElementById('custom-element-name');
+            const noteInput = document.getElementById('custom-element-note');
+            const nameVal = nameInput.value.trim();
+            const noteVal = noteInput.value.trim() || 'يحتاج متابعة ورعاية طبية';
+
+            if (!nameVal) {
+                showToast('يرجى كتابة اسم العنصر أو التحليل أولاً', 'warning');
+                nameInput.focus();
+                return;
+            }
+
+            const customId = 'custom_' + Date.now();
+            allItems.unshift({
+                id: customId,
+                name: nameVal,
+                category: 'essential',
+                role: 'عنصر مخصص تمت إضافته للتقرير',
+                defaultNote: noteVal
+            });
+            selectedItemsMap.set(customId, {
+                id: customId,
+                name: nameVal,
+                careNote: noteVal
+            });
+
+            nameInput.value = '';
+            noteInput.value = '';
+            renderVitaminsGrid();
+            syncReceiptPreview();
+            showToast(`تمت إضافة "${nameVal}" للتقرير`, 'success');
+        }
+
+        // إدارة الأدوية والجرعات (Rx)
+        function toggleAddMedDrawer() {
+            document.getElementById('add-med-drawer').classList.toggle('hidden');
+        }
+
+        function addTempDosage() {
+            const input = document.getElementById('new-med-dosage-input');
+            const val = input.value.trim();
+            if (!val) {
+                showToast('اكتب وصف الجرعة أولاً', 'warning');
+                return;
+            }
+            if (!tempNewDosages.includes(val)) {
+                tempNewDosages.push(val);
+            }
+            input.value = '';
+            renderTempDosagesList();
+        }
+
+        function removeTempDosage(idx) {
+            tempNewDosages.splice(idx, 1);
+            renderTempDosagesList();
+        }
+
+        function renderTempDosagesList() {
+            const container = document.getElementById('temp-dosages-list');
+            if (tempNewDosages.length === 0) {
+                container.innerHTML = `<span class="text-[11px] text-slate-400">لم يتم إضافة جرعات بعد</span>`;
+                return;
+            }
+            container.innerHTML = tempNewDosages.map((d, idx) => `
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-indigo-100 text-indigo-900 rounded-lg text-xs font-bold">
+                    <span>${escapeHtml(d)}</span>
+                    <button type="button" onclick="removeTempDosage(${idx})" class="text-rose-600 hover:text-rose-800 cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+                </span>
+            `).join('');
+        }
+
+        async function saveNewMedicationToFirebase() {
+            const name = document.getElementById('new-med-name').value.trim();
+            const price = parseFloat(document.getElementById('new-med-price').value);
+
+            if (!name) {
+                showToast('يرجى إدخال اسم الدواء / المنتج', 'error');
+                return;
+            }
+            if (isNaN(price) || price < 0) {
+                showToast('يرجى إدخال سعر صحيح للدواء', 'error');
+                return;
+            }
+            if (tempNewDosages.length === 0) {
+                showToast('يرجى إضافة جرعة واحدة على الأقل للدواء', 'warning');
+                return;
+            }
+
+            const btn = document.getElementById('btn-save-med');
+            btn.disabled = true;
+
+            try {
+                const payload = {
+                    name,
+                    price,
+                    dosages: [...tempNewDosages],
+                    createdAt: new Date().toISOString()
+                };
+                const res = await fetch(`${FIREBASE_DB_URL}/pharmacy_medications.json`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!res.ok) throw new Error('فشل حفظ الدواء');
+
+                document.getElementById('new-med-name').value = '';
+                document.getElementById('new-med-price').value = '';
+                tempNewDosages = [];
+                renderTempDosagesList();
+                toggleAddMedDrawer();
+                showToast(`تم حفظ "${name}" في قاعدة بيانات الأدوية`, 'success');
+                await fetchMedicationsFromFirebase();
+            } catch (e) {
+                showToast('تعذر حفظ الدواء في قاعدة البيانات', 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function fetchMedicationsFromFirebase() {
+            try {
+                const res = await fetch(`${FIREBASE_DB_URL}/pharmacy_medications.json`);
+                if (!res.ok) return;
+                const data = await res.json();
+                pharmacyMedications = data ? Object.entries(data).map(([key, val]) => ({ id: key, ...val })) : [];
+                renderMedicationsDropdown();
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function renderMedicationsDropdown() {
+            const select = document.getElementById('select-medication');
+            if (pharmacyMedications.length === 0) {
+                select.innerHTML = `<option value="">-- لا توجد أدوية مسجلة بعد (اضغط تسجيل دواء جديد) --</option>`;
+                return;
+            }
+            select.innerHTML = `<option value="">-- اختر الدواء (${pharmacyMedications.length} متاح) --</option>` +
+                pharmacyMedications.map(m => `<option value="${m.id}">${escapeHtml(m.name)} - (${m.price} ج.م)</option>`).join('');
+        }
+
+        function onMedicationSelectChange() {
+            const medId = document.getElementById('select-medication').value;
+            const dosageSelect = document.getElementById('select-medication-dosage');
+            const customWrapper = document.getElementById('custom-dosage-wrapper');
+            customWrapper.classList.add('hidden');
+
+            if (!medId) {
+                dosageSelect.innerHTML = `<option value="">-- اختر الدواء أولاً --</option>`;
+                return;
+            }
+
+            const med = pharmacyMedications.find(m => m.id === medId);
+            if (!med || !Array.isArray(med.dosages)) return;
+
+            dosageSelect.innerHTML = med.dosages.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('') +
+                `<option value="__CUSTOM__">+ كتابة جرعة خاصة لهذا العميل...</option>`;
+        }
+
+        function onDosageSelectChange() {
+            const val = document.getElementById('select-medication-dosage').value;
+            const customWrapper = document.getElementById('custom-dosage-wrapper');
+            if (val === '__CUSTOM__') {
+                customWrapper.classList.remove('hidden');
+                document.getElementById('custom-dosage-text').focus();
+            } else {
+                customWrapper.classList.add('hidden');
+            }
+        }
+
+        function addMedicationToReport() {
+            const medId = document.getElementById('select-medication').value;
+            if (!medId) {
+                showToast('يرجى اختيار الدواء أولاً', 'warning');
+                return;
+            }
+            const med = pharmacyMedications.find(m => m.id === medId);
+            if (!med) return;
+
+            let chosenDosage = document.getElementById('select-medication-dosage').value;
+            if (chosenDosage === '__CUSTOM__') {
+                chosenDosage = document.getElementById('custom-dosage-text').value.trim();
+                if (!chosenDosage) {
+                    showToast('يرجى كتابة الجرعة المخصصة', 'warning');
+                    return;
+                }
+            }
+
+            selectedReportMedications.push({
+                medId: med.id,
+                name: med.name,
+                price: parseFloat(med.price) || 0,
+                dosage: chosenDosage
+            });
+
+            document.getElementById('custom-dosage-text').value = '';
+            syncReceiptPreview();
+            showToast(`تمت إضافة "${med.name}" إلى الوصفة الطبية`, 'success');
+        }
+
+        function removeMedicationFromReport(index) {
+            selectedReportMedications.splice(index, 1);
+            syncReceiptPreview();
+        }
+
+        // مزامنة كافة البيانات مع الإيصال الحراري (80mm) والواجهة
+        function syncReceiptPreview() {
+            const name = document.getElementById('client-name').value.trim();
+            const phone = document.getElementById('client-phone').value.trim();
+            const address = document.getElementById('client-address').value.trim();
+            const age = document.getElementById('client-age').value.trim();
+            const weight = parseFloat(document.getElementById('client-weight').value);
+            const height = parseFloat(document.getElementById('client-height').value);
+
+            document.getElementById('rec-name').textContent = name || '---';
+            document.getElementById('rec-phone').textContent = phone || '---';
+            document.getElementById('rec-address').textContent = address || '---';
+            document.getElementById('rec-age').textContent = age ? `${age} سنة` : '--';
+            document.getElementById('rec-weight').textContent = !isNaN(weight) && weight > 0 ? `${weight} كجم` : '--';
+            document.getElementById('rec-height').textContent = !isNaN(height) && height > 0 ? `${height} سم` : '--';
+
+            const bmiBadge = document.getElementById('bmi-badge');
+            if (!isNaN(weight) && weight > 0 && !isNaN(height) && height > 0) {
+                const hMeters = height / 100;
+                const bmi = (weight / (hMeters * hMeters)).toFixed(1);
+                bmiBadge.textContent = `BMI: ${bmi}`;
+                bmiBadge.classList.remove('hidden');
+            } else {
+                bmiBadge.classList.add('hidden');
+            }
+
+            const count = selectedItemsMap.size;
+            document.getElementById('selected-vitamins-counter').textContent = `المختار: ${count} عنصر`;
+            document.getElementById('rec-items-count').textContent = count;
+
+            const recVitList = document.getElementById('rec-vitamins-list');
+            if (count === 0) {
+                recVitList.innerHTML = `<p class="text-[10.5px] text-center py-1.5 border border-dashed border-black rounded">لم يتم تحديد عناصر بعد</p>`;
+            } else {
+                recVitList.innerHTML = Array.from(selectedItemsMap.values()).map((item, idx) => `
+                    <div class="border-b border-dotted border-black pb-1">
+                        <div class="font-black text-black text-[11px]">${idx + 1}. ${escapeHtml(item.name)}</div>
+                        ${item.careNote ? `<div class="text-[10px] font-bold text-black pr-2.5">- ${escapeHtml(item.careNote)}</div>` : ''}
+                    </div>
+                `).join('');
+            }
+
+            const uiMedsList = document.getElementById('selected-medications-list');
+            const recMedsList = document.getElementById('rec-medications-list');
+            const totalBadge = document.getElementById('meds-total-badge');
+            const recTotalBadge = document.getElementById('rec-meds-total');
+            const rxBox = document.getElementById('rx-manual-box');
+
+            const totalPrice = selectedReportMedications.reduce((sum, m) => sum + (parseFloat(m.price) || 0), 0);
+            totalBadge.textContent = `الإجمالي: ${totalPrice} ج.م`;
+
+            if (selectedReportMedications.length === 0) {
+                uiMedsList.innerHTML = `<p class="text-xs text-slate-400 text-center py-3 border border-dashed border-slate-200 rounded-xl">لم يتم إضافة أدوية إلكترونية بعد</p>`;
+                recMedsList.innerHTML = '';
+                recTotalBadge.classList.add('hidden');
+                rxBox.style.minHeight = '145px';
+            } else {
+                uiMedsList.innerHTML = selectedReportMedications.map((m, idx) => `
+                    <div class="flex items-center justify-between gap-2 p-2.5 bg-indigo-50/70 border border-indigo-200 rounded-xl">
+                        <div>
+                            <div class="font-extrabold text-xs sm:text-sm text-indigo-950">${escapeHtml(m.name)} <span class="text-indigo-700 font-black">(${m.price} ج.م)</span></div>
+                            <div class="text-xs text-slate-600 font-bold mt-0.5"><i class="fa-solid fa-clock ml-1 text-indigo-500"></i> الجرعة: ${escapeHtml(m.dosage)}</div>
+                        </div>
+                        <button type="button" onclick="removeMedicationFromReport(${idx})" class="w-8 h-8 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-700 flex items-center justify-center transition cursor-pointer shrink-0">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
+                    </div>
+                `).join('');
+
+                recMedsList.innerHTML = selectedReportMedications.map((m, idx) => `
+                    <div class="border border-black rounded p-1.5 bg-white">
+                        <div class="flex items-baseline justify-start gap-1.5 font-black text-[11px]">
+                            <span>${idx + 1}. ${escapeHtml(m.name)}</span>
+                            <span class="border border-black px-1 rounded text-[10px]">${m.price} ج.م</span>
+                        </div>
+                        <div class="text-[10px] font-bold mt-0.5">الجرعة: ${escapeHtml(m.dosage)}</div>
+                    </div>
+                `).join('');
+
+                recTotalBadge.textContent = `الإجمالي: ${totalPrice} ج.م`;
+                recTotalBadge.classList.remove('hidden');
+                rxBox.style.minHeight = '85px';
+            }
+        }
+
+        // حفظ التقرير وتفريغ الخانات تلقائياً
+        async function saveReportToFirebase(shouldClearAfterSave = true) {
+            const name = document.getElementById('client-name').value.trim();
+            const phone = document.getElementById('client-phone').value.trim();
+            const address = document.getElementById('client-address').value.trim();
+            const age = document.getElementById('client-age').value.trim();
+            const weight = document.getElementById('client-weight').value.trim();
+            const height = document.getElementById('client-height').value.trim();
+
+            if (!name) {
+                showToast('يرجى إدخال اسم العميل قبل الحفظ', 'error');
+                document.getElementById('client-name').focus();
+                return false;
+            }
+            if (!phone) {
+                showToast('يرجى إدخال رقم موبايل العميل قبل الحفظ', 'error');
+                document.getElementById('client-phone').focus();
+                return false;
+            }
+
+            const btnSave = document.getElementById('btn-save-db');
+            btnSave.disabled = true;
+
+            const reportPayload = {
+                pharmacyBranch: "صيدلية دكتور وائل حافظ - فرع ولاء",
+                client: {
+                    name,
+                    phone,
+                    address: address || "غير محدد",
+                    age: age || "",
+                    weight: weight || "",
+                    height: height || ""
+                },
+                careItems: Array.from(selectedItemsMap.values()),
+                medications: selectedReportMedications,
+                medicationsTotal: selectedReportMedications.reduce((sum, m) => sum + (parseFloat(m.price) || 0), 0),
+                updatedAt: new Date().toISOString()
+            };
+
+            if (!editingReportKey) {
+                reportPayload.createdAt = new Date().toISOString();
+                reportPayload.timestamp = Date.now();
+            }
+
+            try {
+                const targetUrl = editingReportKey 
+                    ? `${FIREBASE_DB_URL}/client_reports/${editingReportKey}.json`
+                    : `${FIREBASE_DB_URL}/client_reports.json`;
+                
+                const httpMethod = editingReportKey ? 'PATCH' : 'POST';
+
+                const response = await fetch(targetUrl, {
+                    method: httpMethod,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(reportPayload)
+                });
+
+                if (!response.ok) throw new Error('خطأ في الاتصال بقاعدة البيانات');
+
+                await response.json();
+                showToast(editingReportKey ? 'تم حفظ التعديلات على التقرير بنجاح!' : 'تم حفظ التقرير وتفريغ الخانات بنجاح!', 'success');
+                
+                await fetchReportsFromFirebase();
+
+                if (shouldClearAfterSave) {
+                    resetFullForm(false);
+                }
+                return true;
+            } catch (error) {
+                showToast('تعذر الاتصال بقاعدة البيانات، تأكد من الاتصال بالإنترنت', 'error');
+                return false;
+            } finally {
+                btnSave.disabled = false;
+            }
+        }
+
+        // حفظ وطباعة حرارية مباشرة ثم تفريغ الخانات
+        async function saveAndPrintReceipt() {
+            const saved = await saveReportToFirebase(false);
+            if (saved) {
+                triggerThermalPrint();
+                setTimeout(() => {
+                    resetFullForm(false);
+                }, 800);
+            }
+        }
+
+        // جلب وعرض سجل التقارير المحفوظة
+        async function fetchReportsFromFirebase() {
+            try {
+                const response = await fetch(`${FIREBASE_DB_URL}/client_reports.json`);
+                if (!response.ok) throw new Error('خطأ في جلب السجلات');
+                const data = await response.json();
+
+                if (!data) {
+                    savedReportsList = [];
+                } else {
+                    savedReportsList = Object.entries(data).map(([key, val]) => ({
+                        firebaseKey: key,
+                        ...val
+                    })).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                }
+
+                document.getElementById('saved-reports-count').textContent = savedReportsList.length;
+                renderSavedRecordsList(savedReportsList);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        function renderSavedRecordsList(records) {
+            const container = document.getElementById('records-list-container');
+            if (!records || records.length === 0) {
+                container.innerHTML = `<div class="text-center py-10 text-slate-500 font-bold">لا توجد تقارير محفوظة حتى الآن</div>`;
+                return;
+            }
+
+            container.innerHTML = records.map(rep => {
+                const clientName = rep.client?.name || 'عميل بدون اسم';
+                const clientPhone = rep.client?.phone || '---';
+                const dateStr = rep.createdAt ? new Date(rep.createdAt).toLocaleDateString('ar-EG', {
+                    year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                }) : '';
+                const itemsCount = Array.isArray(rep.careItems) ? rep.careItems.length : 0;
+                const medsCount = Array.isArray(rep.medications) ? rep.medications.length : 0;
+
+                return `
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h4 class="font-extrabold text-base text-slate-900">${escapeHtml(clientName)}</h4>
+                                <span class="text-xs font-bold text-pharmacy-700 bg-pharmacy-50 px-2.5 py-0.5 rounded-full border border-pharmacy-200" dir="ltr">${escapeHtml(clientPhone)}</span>
+                            </div>
+                            <div class="text-xs text-slate-500 mt-1 flex flex-wrap gap-3 font-semibold">
+                                <span><i class="fa-regular fa-calendar ml-1"></i> ${dateStr}</span>
+                                <span><i class="fa-solid fa-capsules ml-1 text-amber-600"></i> ${itemsCount} عناصر رعاية</span>
+                                <span><i class="fa-solid fa-pills ml-1 text-indigo-600"></i> ${medsCount} أدوية</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 shrink-0 flex-wrap">
+                            <button type="button" onclick="printSavedReportDirectly('${rep.firebaseKey}')" class="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-extrabold rounded-xl shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+                                <i class="fa-solid fa-print"></i>
+                                <span>طباعة فورية</span>
+                            </button>
+                            <button type="button" onclick="loadReportToForm('${rep.firebaseKey}', true)" class="px-3.5 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                                <span>تعديل التقرير</span>
+                            </button>
+                            <button type="button" onclick="deleteReportFromFirebase('${rep.firebaseKey}')" class="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold rounded-xl transition cursor-pointer" title="حذف">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterSavedRecords() {
+            const q = document.getElementById('records-search-input').value.trim().toLowerCase();
+            const filtered = savedReportsList.filter(rep => {
+                const name = (rep.client?.name || '').toLowerCase();
+                const phone = (rep.client?.phone || '').toLowerCase();
+                return name.includes(q) || phone.includes(q);
+            });
+            renderSavedRecordsList(filtered);
+        }
+
+        function printSavedReportDirectly(firebaseKey) {
+            const loaded = loadReportToForm(firebaseKey, false);
+            if (loaded) {
+                closeRecordsModal();
+                setTimeout(() => {
+                    triggerThermalPrint();
+                }, 250);
+            }
+        }
+
+        function loadReportToForm(firebaseKey, isEditMode = true) {
+            const report = savedReportsList.find(r => r.firebaseKey === firebaseKey);
+            if (!report) return false;
+
+            document.getElementById('client-name').value = report.client?.name || '';
+            document.getElementById('client-phone').value = report.client?.phone || '';
+            document.getElementById('client-address').value = report.client?.address === 'غير محدد' ? '' : (report.client?.address || '');
+            document.getElementById('client-age').value = report.client?.age || '';
+            document.getElementById('client-weight').value = report.client?.weight || '';
+            document.getElementById('client-height').value = report.client?.height || '';
+
+            selectedItemsMap.clear();
+            if (Array.isArray(report.careItems)) {
+                report.careItems.forEach(item => {
+                    if (!allItems.some(existing => existing.id === item.id)) {
+                        allItems.unshift({
+                            id: item.id,
+                            name: item.name,
+                            category: 'essential',
+                            role: 'عنصر محفوظ من تقرير سابق',
+                            defaultNote: item.careNote || ''
+                        });
+                    }
+                    selectedItemsMap.set(item.id, {
+                        id: item.id,
+                        name: item.name,
+                        careNote: item.careNote || ''
+                    });
+                });
+            }
+
+            selectedReportMedications = Array.isArray(report.medications) ? [...report.medications] : [];
+            renderVitaminsGrid();
+            syncReceiptPreview();
+
+            if (isEditMode) {
+                editingReportKey = firebaseKey;
+                document.getElementById('edit-mode-client-name').textContent = report.client?.name || '';
+                document.getElementById('edit-mode-banner').classList.remove('hidden');
+                document.getElementById('btn-save-db-text').textContent = 'حفظ التعديلات (Alt+S)';
+                document.getElementById('btn-save-print-text').textContent = 'حفظ وطباعة 80mm (Alt+P)';
+                closeRecordsModal();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                showToast(`تم فتح تقرير "${report.client?.name}" للتعديل`, 'info');
+            }
+            return true;
+        }
+
+        async function deleteReportFromFirebase(firebaseKey) {
+            try {
+                const res = await fetch(`${FIREBASE_DB_URL}/client_reports/${firebaseKey}.json`, {
+                    method: 'DELETE'
+                });
+                if (!res.ok) throw new Error('فشل الحذف');
+                if (editingReportKey === firebaseKey) {
+                    resetFullForm(false);
+                }
+                showToast('تم حذف التقرير بنجاح', 'success');
+                await fetchReportsFromFirebase();
+            } catch (err) {
+                showToast('حدث خطأ أثناء الحذف', 'error');
+            }
+        }
+
+        function triggerThermalPrint() {
+            updateReceiptTimestamp();
+            window.print();
+        }
+
+        function resetFullForm(showNotification = true) {
+            editingReportKey = null;
+            document.getElementById('edit-mode-banner').classList.add('hidden');
+            document.getElementById('btn-save-db-text').textContent = 'حفظ وتفريغ الخانات (Alt+S)';
+            document.getElementById('btn-save-print-text').textContent = 'حفظ وطباعة 80mm (Alt+P)';
+
+            document.getElementById('client-name').value = '';
+            document.getElementById('client-phone').value = '';
+            document.getElementById('client-address').value = '';
+            document.getElementById('client-age').value = '';
+            document.getElementById('client-weight').value = '';
+            document.getElementById('client-height').value = '';
+            document.getElementById('vitamin-search').value = '';
+            document.getElementById('custom-element-name').value = '';
+            document.getElementById('custom-element-note').value = '';
+            document.getElementById('select-medication').value = '';
+            onMedicationSelectChange();
+
+            selectedItemsMap.clear();
+            selectedReportMedications = [];
+            setCategoryFilter('all');
+            syncReceiptPreview();
+
+            document.getElementById('client-name').focus();
+
+            if (showNotification) {
+                showToast('تم تفريغ الخانات وتجهيز تقرير جديد', 'info');
+            }
+        }
+
+        function openRecordsModal() {
+            document.getElementById('records-modal').classList.remove('hidden');
+            fetchReportsFromFirebase();
+        }
+
+        function closeRecordsModal() {
+            document.getElementById('records-modal').classList.add('hidden');
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const styles = {
+                success: 'bg-emerald-600 text-white border-emerald-700',
+                error: 'bg-rose-600 text-white border-rose-700',
+                warning: 'bg-amber-500 text-slate-950 border-amber-600',
+                info: 'bg-slate-800 text-white border-slate-900'
+            };
+            const icons = {
+                success: 'fa-circle-check',
+                error: 'fa-circle-exclamation',
+                warning: 'fa-triangle-exclamation',
+                info: 'fa-circle-info'
+            };
+            toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border font-bold text-sm transition-all duration-300 ${styles[type] || styles.info}`;
+            toast.innerHTML = `<i class="fa-solid ${icons[type] || icons.info} text-lg"></i><span class="flex-1">${escapeHtml(message)}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+            return String(text).replace(/[&<>"']/g, m => map[m]);
+        }
+    </script>
+</body>
+</html>
